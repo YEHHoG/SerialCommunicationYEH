@@ -90,6 +90,7 @@
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.labelStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.serialPort1Arduino = new System.IO.Ports.SerialPort(this.components);
+            this.timerOef5 = new System.Windows.Forms.Timer(this.components);
             this.tabControl.SuspendLayout();
             this.tabPageInstellingen.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -792,6 +793,7 @@
             this.tabPageOefening5.TabIndex = 5;
             this.tabPageOefening5.Text = "Oefening 5";
             this.tabPageOefening5.UseVisualStyleBackColor = true;
+            this.tabPageOefening5.Click += new System.EventHandler(this.tabPageOefening5_Click);
             // 
             // labelHuidigeTemp
             // 
@@ -982,6 +984,7 @@
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel labelStatus;
         private System.IO.Ports.SerialPort serialPort1Arduino;
+        private System.Windows.Forms.Timer timerOef5;
     }
 }
 

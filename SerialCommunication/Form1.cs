@@ -99,11 +99,13 @@ namespace SerialCommunication
                     {
                         radioButtonVerbonden.Checked = true;
                         buttonConnect.Text = "Disconnect";
+                        labelStatus.Text = "Status: Connected";
                     }
                     else
                     {
                         serialPort1Arduino.Close();
                         labelStatus.Text = "Error: verkeerd antwoord";
+                        radioButtonVerbonden.Checked = false;
                     }
                 }
             }
@@ -178,6 +180,77 @@ namespace SerialCommunication
                 radioButtonVerbonden.Checked = false;
                 buttonConnect.Text = "connect";
             }
+        }
+
+        private void tabPageOefening5_Click(object sender, EventArgs e)
+        {
+            timerOef5.Interval = 1000;
+
+            timerOef5.Start();
+          
+            try
+            {
+                if (serialPort1Arduino.IsOpen)
+                {
+
+                    // === GEWENSTE TEMPERATUUR (analoge pin 0) ===
+                    // Herschaling: 0..1023 → 5..45 °C
+                    // Richtingscoëfficiënt: (45 - 5) / (1023 - 0) = 40 / 1023 ≈ 0,0391
+                    // Offset: 5 (wanneer x = 0, moet y = 5)
+
+                    double richtingscoefficientGewenst = 40.0 / 1023.0;
+                    double offsetGewenst = 5.0;
+
+                    // Lees analoge pin 0 uit via seriële communicatie
+                    // Stuur commando naar Arduino en lees antwoord
+                    serialPort1Arduino.WriteLine("READ_A0");
+                    string antwoordA0 = serialPort1Arduino.ReadLine().Trim();
+
+                    int waardeA0 = int.Parse(antwoordA0);
+                    double gewensteTemp = richtingscoefficientGewenst * waardeA0 + offsetGewenst;
+
+                    labelGewensteTemp.Text = gewensteTemp.ToString("F1") + " °C";
+
+
+                    // === HUIDIGE TEMPERATUUR (analoge pin 1) ===
+                    // Herschaling: 0..1023 → 0..500 °C
+                    // Richtingscoëfficiënt: (500 - 0) / (1023 - 0) = 500 / 1023 ≈ 0,4888
+                    // Offset: 0 (wanneer x = 0, moet y = 0)
+
+                    double richtingscoefficientHuidig = 500.0 / 1023.0;
+                    double offsetHuidig = 0.0;
+
+                    // Lees analoge pin 1 uit via seriële communicatie
+                    serialPort1Arduino.WriteLine("READ_A1");
+                    string antwoordA1 = serialPort1Arduino.ReadLine().Trim();
+
+                    int waardeA1 = int.Parse(antwoordA1);
+                    double huidigeTemp = richtingscoefficientHuidig * waardeA1 + offsetHuidig;
+
+                    labelHuidigeTemp.Text = huidigeTemp.ToString("F1") + " °C";
+
+                    if (huidigeTemp < gewensteTemp)
+                    {
+                        // LED AAN
+                        serialPort1Arduino.WriteLine("SET_D2:HIGH");
+
+                    }
+                    else
+                    {
+                        // LED UIT
+                        serialPort1Arduino.WriteLine("SET_D2:LOW");
+                    }
+
+            }   }
+            catch (Exception exception)
+            {
+                labelStatus.Text = "Error: " + exception.Message;
+                serialPort1Arduino.Close();
+                radioButtonVerbonden.Checked = false;
+                buttonConnect.Text = "connect";
+            }
+
+            timerOef5.Stop();
         }
     }
 }
