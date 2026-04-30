@@ -110,6 +110,9 @@ namespace SerialCommunication
             catch (Exception exception)
             {
                 labelStatus.Text = "Error:" + exception.Message;
+                serialPort1Arduino.Close();
+                radioButtonVerbonden.Checked = false;
+                buttonConnect.Text = "Connect";
             }
         }
     }
