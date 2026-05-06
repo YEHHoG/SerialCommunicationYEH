@@ -195,11 +195,8 @@ namespace SerialCommunication
 
         private void StartMijnOefening(object sender, EventArgs e)
         {
-            timerOef5.Interval = 1000;
 
-            timerOef5.Start();
 
-            serialPort1Arduino.WriteLine("set d2 high");
             try
             {
                 if (serialPort1Arduino.IsOpen)
@@ -215,11 +212,13 @@ namespace SerialCommunication
 
                     // Lees analoge pin 0 uit via seriële communicatie
                     // Stuur commando naar Arduino en lees antwoord
-                    serialPort1Arduino.WriteLine("get A0");
-                    string antwoordA0 = serialPort1Arduino.ReadLine().Trim();
+                    serialPort1Arduino.WriteLine("get a0");
+                    string antwoordA0 = serialPort1Arduino.ReadLine();
+                    //antwoordA0.Replace("a0: ", "");
+                    //antwoordA0.Replace("\r", "");
 
-                    int waardeA0 = int.Parse(antwoordA0);
-                    double gewensteTemp = richtingscoefficientGewenst * waardeA0 + offsetGewenst;
+                    int waardeA0 = int.Parse(antwoordA0.Substring(4));
+                    double gewensteTemp = (richtingscoefficientGewenst * waardeA0) + offsetGewenst;
 
                     labelGewensteTemp.Text = gewensteTemp.ToString("F1") + " °C";
 
@@ -233,11 +232,13 @@ namespace SerialCommunication
                     double offsetHuidig = 0.0;
 
                     // Lees analoge pin 1 uit via seriële communicatie
-                    serialPort1Arduino.WriteLine("get A1");
-                    string antwoordA1 = serialPort1Arduino.ReadLine().Trim();
+                    serialPort1Arduino.WriteLine("get a1");
+                    string antwoordA1 = serialPort1Arduino.ReadLine();
+                    //antwoordA1.Replace("a1: ", "");
+                    //antwoordA1.Replace("\r", "");
 
-                    int waardeA1 = int.Parse(antwoordA1);
-                    double huidigeTemp = richtingscoefficientHuidig * waardeA1 + offsetHuidig;
+                    int waardeA1 = int.Parse(antwoordA1.Substring(4));
+                    double huidigeTemp = (richtingscoefficientHuidig * waardeA1) + offsetHuidig;
 
                     labelHuidigeTemp.Text = huidigeTemp.ToString("F1") + " °C";
 
@@ -263,6 +264,69 @@ namespace SerialCommunication
             }
 
             timerOef5.Stop();
+        }
+
+        private void timerOef5_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPort1Arduino.IsOpen)
+                {
+
+                    // === GEWENSTE TEMPERATUUR (analoge pin 0) ===
+                    double richtingscoefficientGewenst = 40.0 / 1023.0;
+                    double offsetGewenst = 5.0;
+
+                    // Lees analoge pin 0 uit via seriële communicatie
+                    serialPort1Arduino.ReadExisting();
+                    serialPort1Arduino.WriteLine("get a0");
+                    string antwoordA0 = serialPort1Arduino.ReadLine();
+
+                    int waardeA0 = int.Parse(antwoordA0.Substring(4));
+                    double gewensteTemp = (richtingscoefficientGewenst * waardeA0) + offsetGewenst;
+
+                    labelGewensteTemp.Text = gewensteTemp.ToString("F1") + " °C";
+
+
+                    // === HUIDIGE TEMPERATUUR (analoge pin 1) ===
+                    double richtingscoefficientHuidig = 500.0 / 1023.0;
+
+                    // Lees analoge pin 1 uit via seriële communicatie
+                    serialPort1Arduino.ReadExisting();
+                    serialPort1Arduino.WriteLine("get a1");
+                    string antwoordA1 = serialPort1Arduino.ReadLine();
+
+
+                    int waardeA1 = int.Parse(antwoordA1.Substring(4));
+                    double huidigeTemp = (richtingscoefficientHuidig * waardeA1);
+
+                    labelHuidigeTemp.Text = huidigeTemp.ToString("F1") + " °C";
+
+                    if (huidigeTemp < gewensteTemp)
+                    {
+                        // LED AAN
+                        serialPort1Arduino.WriteLine("set d2 high");
+
+                    }
+                    else
+                    {
+                        // LED UIT
+                        serialPort1Arduino.WriteLine("set d2 low");
+                    }
+
+                }
+            }
+            catch (Exception exception)
+            {
+                timerOef5.Stop();
+                labelStatus.Text = "Error: " + exception.Message;
+                serialPort1Arduino.Close();
+                radioButtonVerbonden.Checked = false;
+                buttonConnect.Text = "connect";
+            }
+
+            
+
         }
     }
 }

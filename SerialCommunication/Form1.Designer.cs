@@ -871,6 +871,11 @@
             this.serialPort1Arduino.ReadTimeout = 1000;
             this.serialPort1Arduino.WriteTimeout = 1000;
             // 
+            // timerOef5
+            // 
+            this.timerOef5.Interval = 1000;
+            this.timerOef5.Tick += new System.EventHandler(this.timerOef5_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
