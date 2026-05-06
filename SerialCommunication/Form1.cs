@@ -17,6 +17,7 @@ namespace SerialCommunication
         public Form1()
         {
             InitializeComponent();
+            this.tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -182,12 +183,23 @@ namespace SerialCommunication
             }
         }
 
-        private void tabPageOefening5_Click(object sender, EventArgs e)
+        private void TabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Check of de geselecteerde tab degene is van Oefening 5
+            if (tabControl.SelectedTab == tabPageOefening5)
+            {
+                // Hier komt de code die moet starten voor de oefening
+                StartMijnOefening(sender, e);
+            }
+        }
+
+        private void StartMijnOefening(object sender, EventArgs e)
         {
             timerOef5.Interval = 1000;
 
             timerOef5.Start();
-          
+
+            serialPort1Arduino.WriteLine("set d2 high");
             try
             {
                 if (serialPort1Arduino.IsOpen)
@@ -203,7 +215,7 @@ namespace SerialCommunication
 
                     // Lees analoge pin 0 uit via seriële communicatie
                     // Stuur commando naar Arduino en lees antwoord
-                    serialPort1Arduino.WriteLine("READ_A0");
+                    serialPort1Arduino.WriteLine("get A0");
                     string antwoordA0 = serialPort1Arduino.ReadLine().Trim();
 
                     int waardeA0 = int.Parse(antwoordA0);
@@ -221,7 +233,7 @@ namespace SerialCommunication
                     double offsetHuidig = 0.0;
 
                     // Lees analoge pin 1 uit via seriële communicatie
-                    serialPort1Arduino.WriteLine("READ_A1");
+                    serialPort1Arduino.WriteLine("get A1");
                     string antwoordA1 = serialPort1Arduino.ReadLine().Trim();
 
                     int waardeA1 = int.Parse(antwoordA1);
@@ -232,13 +244,13 @@ namespace SerialCommunication
                     if (huidigeTemp < gewensteTemp)
                     {
                         // LED AAN
-                        serialPort1Arduino.WriteLine("SET_D2:HIGH");
+                        serialPort1Arduino.WriteLine("set d2 high");
 
                     }
                     else
                     {
                         // LED UIT
-                        serialPort1Arduino.WriteLine("SET_D2:LOW");
+                        serialPort1Arduino.WriteLine("set d2 low");
                     }
 
             }   }

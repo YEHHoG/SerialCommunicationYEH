@@ -793,7 +793,6 @@
             this.tabPageOefening5.TabIndex = 5;
             this.tabPageOefening5.Text = "Oefening 5";
             this.tabPageOefening5.UseVisualStyleBackColor = true;
-            this.tabPageOefening5.Click += new System.EventHandler(this.tabPageOefening5_Click);
             // 
             // labelHuidigeTemp
             // 
