@@ -14,10 +14,10 @@ namespace SerialCommunication
 {
     public partial class Form1 : Form
     {
-        public Form1()
+       public Form1()
         {
             InitializeComponent();
-            this.tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
+            this.tabControl.SelectedIndexChanged += tabControl_SelectedIndexChanged;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -183,16 +183,16 @@ namespace SerialCommunication
             }
         }
 
-        private void TabControl_SelectedIndexChanged(object sender, EventArgs e)
+        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
             // Check of de geselecteerde tab degene is van Oefening 5
             if (tabControl.SelectedTab == tabPageOefening5)
             {
                 // Hier komt de code die moet starten voor de oefening
-                StartMijnOefening(sender, e);
+                timerOef5.Start();
             }
         }
-
+        /*
         private void StartMijnOefening(object sender, EventArgs e)
         {
 
@@ -264,10 +264,10 @@ namespace SerialCommunication
             }
 
             timerOef5.Stop();
-        }
-
+        }*/
         private void timerOef5_Tick(object sender, EventArgs e)
         {
+            timerOef5.Start();
             try
             {
                 if (serialPort1Arduino.IsOpen)
@@ -315,12 +315,21 @@ namespace SerialCommunication
                     }
 
                 }
+                else
+                {
+                    // Poort is al gesloten (bijv. door externe reden)
+                    timerOef5.Stop();
+                    labelStatus.Text = "Status: Disconnected";
+                    radioButtonVerbonden.Checked = false;
+                    buttonConnect.Text = "Connect";
+                }
             }
             catch (Exception exception)
             {
                 timerOef5.Stop();
+                try { serialPort1Arduino.Close(); } catch { }
+
                 labelStatus.Text = "Error: " + exception.Message;
-                serialPort1Arduino.Close();
                 radioButtonVerbonden.Checked = false;
                 buttonConnect.Text = "connect";
             }
